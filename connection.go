@@ -12,6 +12,36 @@ func (c *ImapConnection) GetState() State {
 	return c.state
 }
 
+func (c *ImapConnection) CheckInbox(login, password string) (err error) {
+	err = c.Authenticate(login, password)
+	if err != nil {
+		return
+	}
+	err = c.OpenInbox()
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *ImapConnection) OpenInbox() (err error) {
+	res, err := c.WriteMessage(`tag select "INBOX"`)
+	if err != nil {
+		return
+	}
+
+	if strings.Index(res, "OK") == -1 {
+		err = PermissionDenied
+		return
+	}
+
+	c.m.Lock()
+	c.state.LoggedIn = true
+	c.m.Unlock()
+
+	return
+}
+
 func (c *ImapConnection) Authenticate(login, password string) (err error) {
 	res, err := c.WriteMessage("authenticate login " + login + " " + password)
 	if err != nil {
@@ -19,13 +49,9 @@ func (c *ImapConnection) Authenticate(login, password string) (err error) {
 	}
 
 	if strings.Index(res, "authenticate OK") == -1 {
-		err = NotAuthenticated
+		err = WrongCredentials
 		return
 	}
-
-	c.m.Lock()
-	c.state.LoggedIn = true
-	c.m.Unlock()
 
 	return
 }

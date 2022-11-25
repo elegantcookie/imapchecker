@@ -4,5 +4,6 @@ import "errors"
 
 var (
 	ConnectionClosed = errors.New("connection is closeed")
-	NotAuthenticated = errors.New("not authenticated")
+	WrongCredentials = errors.New("wrong credentials")
+	PermissionDenied = errors.New("permission denied")
 )
