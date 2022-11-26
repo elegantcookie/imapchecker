@@ -1,5 +1,5 @@
 # imapchecker
-Simple [IMAP/S](https://www.rfc-editor.org/rfc/rfc3501) checker.
+Simple [IMAP/IMAPS](https://www.rfc-editor.org/rfc/rfc3501) checker package.
 
 ## Includes:
 - authorization & inbox select
@@ -43,6 +43,8 @@ if err != nil {
   return
 }
 
+log.Printf("IMAP: account is valid with %s %s for %s", email, password, address)
+
 
 ```
 
@@ -84,6 +86,8 @@ if err != nil {
   log.Printf("have no permission to check mail")
   return
 }
+
+log.Printf("IMAPS: account is valid with %s %s for %s", email, password, address)
 
 ```
 
