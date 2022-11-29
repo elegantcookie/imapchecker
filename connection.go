@@ -36,7 +36,7 @@ func (c *ImapConnection) OpenInbox() (err error) {
 	}
 
 	c.m.Lock()
-	c.state.LoggedIn = true
+	c.state.Valid = true
 	c.m.Unlock()
 
 	return
@@ -52,6 +52,10 @@ func (c *ImapConnection) Authenticate(login, password string) (err error) {
 		err = WrongCredentials
 		return
 	}
+
+	c.m.Lock()
+	c.state.LoggedIn = true
+	c.m.Unlock()
 
 	return
 }

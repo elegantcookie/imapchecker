@@ -17,6 +17,7 @@ type ImapConnection struct {
 }
 
 type State struct {
+	Valid    bool
 	LoggedIn bool
 	Closed   bool
 }
