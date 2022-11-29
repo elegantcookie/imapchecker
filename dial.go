@@ -2,11 +2,12 @@ package imapchecker
 
 import (
 	"crypto/tls"
+	"golang.org/x/net/context"
 	"golang.org/x/net/proxy"
 )
 
-func DialWithDialer(dialer proxy.Dialer, address string) (c *ImapConnection, err error) {
-	conn, err := dialer.Dial("tcp", address)
+func DialWithContextDialer(ctx context.Context, dialer proxy.ContextDialer, address string) (c *ImapConnection, err error) {
+	conn, err := dialer.DialContext(ctx, "tcp", address)
 	if err != nil {
 		return
 	}
@@ -15,9 +16,9 @@ func DialWithDialer(dialer proxy.Dialer, address string) (c *ImapConnection, err
 	return
 }
 
-func DialWithDialerTLS(dialer proxy.Dialer, address string, conf *tls.Config) (c *ImapConnection, err error) {
+func DialWithContextDialerTLS(ctx context.Context, dialer proxy.ContextDialer, address string, conf *tls.Config) (c *ImapConnection, err error) {
 
-	d, err := dialer.Dial("tcp", address)
+	d, err := dialer.DialContext(ctx, "tcp", address)
 	if err != nil {
 		return
 	}
