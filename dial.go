@@ -6,28 +6,22 @@ import (
 	"golang.org/x/net/proxy"
 )
 
-func DialWithContextDialer(ctx context.Context, dialer proxy.ContextDialer, address string) (c *ImapConnection, err error) {
-	conn, err := dialer.DialContext(ctx, "tcp", address)
+func DialWithContextDialer(ctx context.Context, dialer proxy.ContextDialer, checkerConfig *Config) (c *ImapConnection, err error) {
+	err = parseConfig(checkerConfig)
 	if err != nil {
 		return
 	}
-	c = NewImapConnection(conn, false, address)
+
+	conn, err := dialer.DialContext(ctx, "tcp", checkerConfig.Address)
+	if err != nil {
+		return
+	}
+
+	if checkerConfig.UseTLS {
+		conn = tls.Client(conn, checkerConfig.TLSConfig)
+	}
+
+	c = newConnection(conn, checkerConfig)
 	err = c.verifyOnStart()
 	return
-}
-
-func DialWithContextDialerTLS(ctx context.Context, dialer proxy.ContextDialer, address string, conf *tls.Config) (c *ImapConnection, err error) {
-
-	d, err := dialer.DialContext(ctx, "tcp", address)
-	if err != nil {
-		return
-	}
-	conn := tls.Client(d, conf)
-	if err != nil {
-		return
-	}
-	c = NewImapConnection(conn, true, address)
-	err = c.verifyOnStart()
-
-	return c, err
 }

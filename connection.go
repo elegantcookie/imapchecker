@@ -93,6 +93,7 @@ func (c *ImapConnection) ReadMessage() (res string, err error) {
 }
 
 func (c *ImapConnection) verifyOnStart() (err error) {
+	c.SetReadDeadline(time.Now().Add(c.conf.ReadTimeout))
 	res, err := c.ReadMessage()
 	if err != nil {
 		return
@@ -103,12 +104,11 @@ func (c *ImapConnection) verifyOnStart() (err error) {
 	return
 }
 
-func NewImapConnection(conn net.Conn, tls bool, address string) *ImapConnection {
+func newConnection(conn net.Conn, conf *Config) *ImapConnection {
 	return &ImapConnection{
-		conn:    conn,
-		tls:     tls,
-		address: address,
-		state:   State{},
+		conn:  conn,
+		conf:  conf,
+		state: State{},
 	}
 }
 

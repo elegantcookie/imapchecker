@@ -8,12 +8,10 @@ import (
 type ImapConnection struct {
 	conn net.Conn
 
-	tls     bool
-	address string
+	m sync.Mutex
 
 	state State
-
-	m sync.Mutex
+	conf  *Config
 }
 
 type State struct {
