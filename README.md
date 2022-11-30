@@ -14,33 +14,25 @@ email := "email@mail.domain"
 password := "password"
 address := "example.mail.domain:143"
 
-dialer := &net.Dialer{Timeout: 5 * time.Second}
+// create a dialer that implements proxy.ContextDialer interface
+dialer := &net.Dialer{}
 
-// create a connection using dialer
-conn, err := imapchecker.DialWithDialer(dialer, address)
+// set a timeout for context
+ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+
+// create a checker config
+config := NewConfig(address)
+
+// open a connection
+conn, err := DialWithContextDialer(ctx, dialer, config)
 if err != nil {
-  log.Printf("failed to connect the server: %v", err)
-  return
+	log.Fatal(err)
 }
 
-// check if credentials are valid and you have a permission to check mail in one function
-err = conn.CheckInbox(email, password)
+// check if mail is valid 
+err = conn.CheckInbox(ctx, email, password)
 if err != nil {
-  log.Printf("failed to login/select inbox")
-  return
-}
-
-// or do it separately
-err = conn.Authenticate(email, password)
-if err != nil {
-  log.Printf("failed to login")
-  return
-}
-
-err = conn.OpenInbox()
-if err != nil {
-  log.Printf("have no permission to check mail")
-  return
+	log.Fatal(err)
 }
 
 log.Printf("IMAP: account is valid with %s %s for %s", email, password, address)
@@ -56,36 +48,32 @@ email := "email@mail.domain"
 password := "password"
 address := "example.mail.domain:993"
 
-dialer := &net.Dialer{Timeout: 5 * time.Second}
+// create a dialer that implements proxy.ContextDialer interface
+dialer := &net.Dialer{}
 
-config := &tls.Config{
-			InsecureSkipVerify: true,
-		}
+// set a timeout for context
+ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
-// create a tls connection using dialer
-conn, err := imapchecker.DialWithDialerTLS(dialer, address, config)
-if err != nil {
-  log.Printf("failed to connect the server: %v", err)
-  return
+// create tls config
+tlsConfig := &tls.Config{
+	InsecureSkipVerify: true,
 }
 
-err = conn.CheckInbox(email, password)
+// create a checker config with tls
+config := NewTLSConfig(address, tlsConfig)
+
+// open a connection
+conn, err := DialWithContextDialer(ctx, dialer, config)
 if err != nil {
-  log.Printf("failed to login/select inbox")
-  return
+	log.Fatal(err)
 }
 
-err = conn.Authenticate(email, password)
+// check if mail is valid 
+err = conn.CheckInbox(ctx, email, password)
 if err != nil {
-  log.Printf("failed to login")
-  return
+	log.Fatal(err)
 }
 
-err = conn.OpenInbox()
-if err != nil {
-  log.Printf("have no permission to check mail")
-  return
-}
 
 log.Printf("IMAPS: account is valid with %s %s for %s", email, password, address)
 
